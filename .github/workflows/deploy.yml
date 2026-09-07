@@ -56,3 +56,4 @@ jobs:
           script: |
             cd ~/docker-infra
             git pull origin main
+            docker compose up -d --build
