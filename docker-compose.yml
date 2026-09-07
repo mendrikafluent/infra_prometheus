@@ -20,7 +20,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "--no-check-certificate", "https://localhost/"]
       interval: 5s
       timeout: 3s
       retries: 5
