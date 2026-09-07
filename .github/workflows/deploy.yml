@@ -16,8 +16,8 @@ jobs:
       - name: Validate Prometheus config
         run: |
           # ✅ Exécuté sur le runner GitHub
-          docker run --rm -v $PWD:/config prom/prometheus:latest \
-            promtool check config /config/prometheus.yml
+          docker run --rm -v $PWD:/config --entrypoint promtool prom/prometheus:latest \
+            check config /config/prometheus.yml
 
       - name: Validate Nginx config
         run: |
