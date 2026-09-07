@@ -13,17 +13,10 @@ services:
     container_name: nginx
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt:ro
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "--no-check-certificate", "https://localhost/"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
     networks:
       - devops-network
 
