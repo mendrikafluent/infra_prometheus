@@ -56,4 +56,16 @@ jobs:
           script: |
             cd ~/docker-infra
             git pull origin main
+
+            # Bootstrap: nginx needs a cert at this path to start even before
+            # certbot has issued the real one (chicken-and-egg on first deploy).
+            CERT_DIR=certbot/conf/live/92.222.86.157.nip.io
+            if [ ! -f "$CERT_DIR/fullchain.pem" ]; then
+              mkdir -p "$CERT_DIR"
+              openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+                -subj "/CN=92.222.86.157.nip.io" \
+                -keyout "$CERT_DIR/privkey.pem" \
+                -out "$CERT_DIR/fullchain.pem"
+            fi
+
             docker compose up -d --build
