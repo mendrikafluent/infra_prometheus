@@ -43,7 +43,7 @@ services:
       - "--web.route-prefix=/"
       - "--web.enable-admin-api"
     ports:
-      - "127.0.0.1:9090:9090"   # bound to localhost only — see README for remote access
+      - "127.0.0.1:9090:9090" ## bound to localhost only — see README for remote access
     networks:
       - devops-network
 
@@ -62,6 +62,6 @@ services:
       - "--path.rootfs=/rootfs"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     ports:
-      - "127.0.0.1:9100:9100"   # bound to localhost only, scraped internally by prometheus
+      - "127.0.0.1:9100:9100" # bound to localhost only, scraped internally by prometheus
     networks:
       - devops-network
