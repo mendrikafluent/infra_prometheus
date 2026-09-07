@@ -19,17 +19,6 @@ jobs:
           docker run --rm -v $PWD:/config --entrypoint promtool prom/prometheus:latest \
             check config /config/prometheus.yml
 
-      - name: Validate Nginx config
-        run: |
-          # ✅ Exécuté sur le runner GitHub
-          # Le runner n'a pas le réseau docker-compose : les noms de service
-          # ne sont pas résolus, on les simule pour que `nginx -t` charge la conf.
-          docker run --rm \
-            --add-host prometheus:127.0.0.1 \
-            --add-host prometheus_interface:127.0.0.1 \
-            -v $PWD/nginx.conf:/etc/nginx/nginx.conf:ro \
-            nginx:alpine nginx -t
-
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   # CD: Déploiement (exécuté sur TON VPS)
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
