@@ -8,6 +8,13 @@ volumes:
   prometheus_data: {}
 
 services:
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: certbot certonly --webroot -w /var/www/certbot -d 92.222.86.157.nip.io
+
   nginx:
     image: nginx:alpine
     container_name: nginx
