@@ -6,6 +6,7 @@ networks:
 
 volumes:
   prometheus_data: {}
+  grafana-storage:
 
 services:
   nginx:
@@ -57,5 +58,22 @@ services:
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     ports:
       - "127.0.0.1:9100:9100" # bound to localhost only, scraped internally by prometheus
+    networks:
+      - devops-network
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - nginx
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # À changer !
+      - GF_SERVER_ROOT_URL=https://92.222.86.157.nip.io/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
     networks:
       - devops-network
