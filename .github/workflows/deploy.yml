@@ -22,20 +22,12 @@ jobs:
       - name: Validate Nginx config
         run: |
           # ✅ Exécuté sur le runner GitHub
-          # Le runner n'a ni le réseau docker-compose (noms de service non résolus)
-          # ni les certs Let's Encrypt du VPS : on les simule pour que `nginx -t`
-          # puisse charger la conf sans lancer le vrai stack.
-          mkdir -p /tmp/fake-certs
-          openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-            -subj "/CN=localhost" \
-            -keyout /tmp/fake-certs/privkey.pem \
-            -out /tmp/fake-certs/fullchain.pem
-
+          # Le runner n'a pas le réseau docker-compose : les noms de service
+          # ne sont pas résolus, on les simule pour que `nginx -t` charge la conf.
           docker run --rm \
             --add-host prometheus:127.0.0.1 \
             --add-host prometheus_interface:127.0.0.1 \
             -v $PWD/nginx.conf:/etc/nginx/nginx.conf:ro \
-            -v /tmp/fake-certs:/etc/letsencrypt/live/92.222.86.157.nip.io:ro \
             nginx:alpine nginx -t
 
   # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -56,16 +48,5 @@ jobs:
           script: |
             cd ~/docker-infra
             git pull origin main
-
-            # Bootstrap: nginx needs a cert at this path to start even before
-            # certbot has issued the real one (chicken-and-egg on first deploy).
-            CERT_DIR=certbot/conf/live/92.222.86.157.nip.io
-            if [ ! -f "$CERT_DIR/fullchain.pem" ]; then
-              mkdir -p "$CERT_DIR"
-              openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-                -subj "/CN=92.222.86.157.nip.io" \
-                -keyout "$CERT_DIR/privkey.pem" \
-                -out "$CERT_DIR/fullchain.pem"
-            fi
 
             docker compose up -d --build
