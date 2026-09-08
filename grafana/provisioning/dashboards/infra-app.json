@@ -1,0 +1,229 @@
+{
+  "title": "App – Infra & Performance",
+  "uid": "app-infra",
+  "tags": ["prometheus-app", "infra"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "HTTP error ratio (5m)",
+      "description": "job:http_requests:error_ratio5m -- share of 5xx responses over all answered requests.",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        { "expr": "job:http_requests:error_ratio5m", "legendFormat": "error ratio" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "HTTP p95 latency (5m)",
+      "description": "job:http_request_duration_seconds:p95_5m",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        { "expr": "job:http_request_duration_seconds:p95_5m", "legendFormat": "p95" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "DB p99 latency (5m)",
+      "description": "job:db_response_time_milliseconds:p99_5m",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        { "expr": "job:db_response_time_milliseconds:p99_5m", "legendFormat": "p99" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 800 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Requests / s (5m)",
+      "description": "Total HTTP throughput across all routes and status codes.",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        { "expr": "sum(job:http_requests:rate5m)", "legendFormat": "rps" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "HTTP request rate, by route & status",
+      "description": "job:http_requests:rate5m",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "expr": "job:http_requests:rate5m", "legendFormat": "{{route}} [{{status_code}}]" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "HTTP latency, p95 vs mean",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "expr": "job:http_request_duration_seconds:p95_5m", "legendFormat": "p95" },
+        {
+          "expr": "sum by (job) (rate(http_request_duration_seconds_sum[5m])) / sum by (job) (rate(http_request_duration_seconds_count[5m]))",
+          "legendFormat": "mean"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "DB latency, p95/p99/mean",
+      "description": "job:db_response_time_milliseconds:{p95_5m,p99_5m,mean_5m}",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        { "expr": "job:db_response_time_milliseconds:p95_5m", "legendFormat": "p95" },
+        { "expr": "job:db_response_time_milliseconds:p99_5m", "legendFormat": "p99" },
+        { "expr": "job:db_response_time_milliseconds:mean_5m", "legendFormat": "mean" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "DB query rate",
+      "description": "job:db_response_time_milliseconds:rate5m -- queries per second, by operation.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "expr": "sum by (operation) (rate(db_response_time_milliseconds_count[5m]))", "legendFormat": "{{operation}}" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Node process – heap usage",
+      "description": "Default Node.js metrics exposed via prom-client (nestjs-prometheus defaultMetrics).",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        { "expr": "nodejs_heap_size_used_bytes{app=\"prometheus\"}", "legendFormat": "heap used" },
+        { "expr": "nodejs_heap_size_total_bytes{app=\"prometheus\"}", "legendFormat": "heap total" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Node process – event loop lag (p99)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "expr": "nodejs_eventloop_lag_p99_seconds{app=\"prometheus\"}", "legendFormat": "p99 lag" }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Node process – CPU usage",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        { "expr": "rate(process_cpu_user_seconds_total{app=\"prometheus\"}[5m])", "legendFormat": "user" },
+        { "expr": "rate(process_cpu_system_seconds_total{app=\"prometheus\"}[5m])", "legendFormat": "system" }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Host CPU usage",
+      "description": "node_exporter -- 1 minus idle time, averaged across cores.",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1, "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+          "legendFormat": "{{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Host memory usage",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1, "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+          "legendFormat": "{{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Host disk I/O",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] },
+      "targets": [
+        { "expr": "rate(node_disk_read_bytes_total[5m])", "legendFormat": "{{device}} read" },
+        { "expr": "rate(node_disk_written_bytes_total[5m])", "legendFormat": "{{device}} write" }
+      ]
+    }
+  ]
+}

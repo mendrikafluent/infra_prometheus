@@ -1,0 +1,16 @@
+# Tells Grafana to load every dashboard JSON found under the mounted folder,
+# so a new file dropped in ./monitoring/grafana/dashboards appears without
+# any manual import.
+apiVersion: 1
+
+providers:
+  - name: prometheus-app
+    orgId: 1
+    folder: "Cart"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

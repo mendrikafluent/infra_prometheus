@@ -1,0 +1,14 @@
+# Auto-provisions the Prometheus datasource, so a fresh Grafana container
+# already has it wired on first boot -- no manual "Add data source" step.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # 'prometheus_interface' is this service's container_name: the bare service
+    # name 'prometheus' collides with an unrelated NestJS API on the same
+    # external network (see api_upstream in nginx.conf).
+    url: http://prometheus_interface:9090
+    isDefault: true
+    editable: false
