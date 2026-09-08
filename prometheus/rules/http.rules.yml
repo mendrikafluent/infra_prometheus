@@ -1,0 +1,28 @@
+groups:
+  - name: http_requests
+    rules:
+      - record: job:http_requests:rate5m
+        expr: sum by (job, route, status_code) (rate(http_requests_total[5m]))
+
+      - record: job:http_requests:error_ratio5m
+        expr: |
+          sum by (job) (rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum by (job) (rate(http_requests_total[5m]))
+
+      - record: job:http_request_duration_seconds:p95_5m
+        expr: histogram_quantile(0.95, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))
+
+  - name: db_response_time
+    rules:
+      - record: job:db_response_time_milliseconds:p95_5m
+        expr: histogram_quantile(0.95, sum by (job, le) (rate(db_response_time_milliseconds_bucket[5m])))
+
+      - record: job:db_response_time_milliseconds:p99_5m
+        expr: histogram_quantile(0.99, sum by (job, le) (rate(db_response_time_milliseconds_bucket[5m])))
+
+      - record: job:db_response_time_milliseconds:mean_5m
+        expr: |
+          sum by (job) (rate(db_response_time_milliseconds_sum[5m]))
+          /
+          sum by (job) (rate(db_response_time_milliseconds_count[5m]))

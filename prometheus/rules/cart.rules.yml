@@ -1,0 +1,14 @@
+groups:
+  - name: cart_business
+    rules:
+      - record: job:cart_created:rate5m
+        expr: sum by (job, status) (rate(cart_created_total[5m]))
+
+      - record: job:cart_abandoned:increase1d
+        expr: sum by (job) (increase(cart_abandoned_total[1d]))
+
+      - record: job:cart:abandon_ratio1d
+        expr: |
+          sum by (job) (increase(cart_abandoned_total[1d]))
+          /
+          sum by (job) (increase(cart_created_total{status="success"}[1d]))

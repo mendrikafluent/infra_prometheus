@@ -2,6 +2,9 @@ global:
   scrape_interval: 15s       # how often to scrape targets by default
   evaluation_interval: 15s   # how often to evaluate alerting rules
 
+rule_files:
+  - "rules/*.yml"
+
 scrape_configs:
   # Prometheus scraping itself
   - job_name: "prometheus"
