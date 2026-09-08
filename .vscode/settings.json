@@ -1,0 +1,8 @@
+{
+  "yaml.schemas": {
+    "false": [
+      "grafana/provisioning/datasources/*.yml",
+      "grafana/provisioning/dashboards/*.yml"
+    ]
+  }
+}
